@@ -31,8 +31,8 @@ Auralis is a next-generation neural speech synthesis platform engineered for bot
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Marsbansiti/stitch-auralis-saas-landing-page.git
-   cd stitch-auralis-saas-landing-page
+   git clone https://github.com/Marsbansiti/auralis-ai-saas-landing-page.git
+   cd auralis-ai-saas-landing-page
    ```
 
 2. **Run a local server (Python):**
