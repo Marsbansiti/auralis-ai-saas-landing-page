@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Auralis — AI audio that sounds human</title>
+    <!-- Tailwind CSS with plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#111111",
+                        "on-primary": "#ffffff",
+                        "secondary-auralis": "#6B6B6B",
+                        "panel-auralis": "#F3F2EF",
+                        "card-auralis": "#FCFCFB",
+                        "border-auralis": "#E7E7E4",
+                        "surface": "#F7F7F5",
+                        "surface-variant": "#EAE8E3",
+                        "accent-blue": "#3b82f6",
+                        "accent-purple": "#8b5cf6",
+                        "accent-coral": "#f43f5e",
+                        "accent-emerald": "#10b981"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "md": "0.75rem",
+                        "lg": "1rem",
+                        "xl": "1.25rem",
+                        "2xl": "1.5rem",
+                        "3xl": "1.75rem",
+                        "4xl": "2.25rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        sans: ["Geist", "Inter", "system-ui", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"]
+                    },
+                    letterSpacing: {
+                        tighter: "-0.04em",
+                        tight: "-0.02em",
+                        wide: "0.05em",
+                        widest: "0.12em"
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg-canvas: #F7F7F5;
+            --text-main: #111111;
+            --text-sub: #6B6B6B;
+            --panel-bg: #F3F2EF;
+            --card-bg: #FCFCFB;
+            --border-line: #E7E7E4;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-main);
+            font-family: 'Geist', sans-serif;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            user-select: none;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Marquee Animation */
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            display: flex;
+            width: 200%;
+            animation: marquee 35s linear infinite;
+        }
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
+
+        /* Fluid Glowing Orbs */
+        @keyframes float-orb-1 {
+            0%, 100% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(-30px, 20px) scale(1.08); }
+        }
+        @keyframes float-orb-2 {
+            0%, 100% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(35px, -25px) scale(1.12); }
+        }
+        @keyframes float-orb-3 {
+            0%, 100% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(20px, 30px) scale(0.95); }
+        }
+        .orb-float-1 { animation: float-orb-1 9s ease-in-out infinite; }
+        .orb-float-2 { animation: float-orb-2 11s ease-in-out infinite; }
+        .orb-float-3 { animation: float-orb-3 13s ease-in-out infinite; }
+
+        /* Equalizer bar pulse */
+        @keyframes eq-dance {
+            0%, 100% { height: 20%; }
+            50% { height: 95%; }
+        }
+        .eq-bar {
+            transition: height 0.15s ease;
+        }
+        .eq-playing:nth-child(2n) { animation: eq-dance 0.75s ease-in-out infinite alternate; }
+        .eq-playing:nth-child(2n+1) { animation: eq-dance 0.55s ease-in-out infinite alternate 0.15s; }
+        .eq-playing:nth-child(3n) { animation: eq-dance 0.85s ease-in-out infinite alternate 0.25s; }
+        .eq-playing:nth-child(4n) { animation: eq-dance 0.65s ease-in-out infinite alternate 0.35s; }
+
+        /* Subtle glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .glass-card-dark {
+            background: rgba(18, 18, 18, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Custom scrollbar hide */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Pulse ring for active play state */
+        @keyframes ring-pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.25); }
+            70% { transform: scale(1); box-shadow: 0 0 0 18px rgba(17, 17, 17, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(17, 17, 17, 0); }
+        }
+        .pulse-active {
+            animation: ring-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-black selection:text-white">
+
+    <!-- TOP NAVIGATION -->
+    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-border-auralis/80 bg-[#F7F7F5]/85 backdrop-blur-md transition-all">
+        <div class="max-w-[1280px] mx-auto px-6 md:px-8 flex justify-between items-center h-[72px]">
+            <div class="flex items-center gap-10 lg:gap-12">
+                <a class="text-xl md:text-[22px] font-bold tracking-tighter text-primary flex items-center gap-2 group" href="#">
+                    <span class="w-2.5 h-2.5 rounded-full bg-primary group-hover:scale-125 transition-transform"></span>
+                    <span>Auralis</span>
+                </a>
+                <div class="hidden md:flex items-center gap-6 lg:gap-8">
+                    <a class="text-sm font-medium tracking-tight text-secondary-auralis hover:text-primary transition-colors" href="#studio">Auralis Studio</a>
+                    <a class="text-sm font-medium tracking-tight text-secondary-auralis hover:text-primary transition-colors" href="#agents">Auralis Agents</a>
+                    <a class="text-sm font-medium tracking-tight text-secondary-auralis hover:text-primary transition-colors" href="#api">Auralis API</a>
+                    <a class="text-sm font-medium tracking-tight text-secondary-auralis hover:text-primary transition-colors" href="#resources">Resources</a>
+                    <a class="text-sm font-medium tracking-tight text-secondary-auralis hover:text-primary transition-colors" href="#enterprise">Enterprise</a>
+                    <a class="text-sm font-medium tracking-tight text-secondary-auralis hover:text-primary transition-colors" href="#pricing">Pricing</a>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button id="soundMuteBtn" class="w-9 h-9 rounded-full border border-border-auralis flex items-center justify-center text-secondary-auralis hover:text-primary hover:bg-panel-auralis transition-colors" title="Toggle Synthesizer Audio">
+                    <span class="material-symbols-outlined text-[19px]" id="soundMuteIcon">volume_up</span>
+                </button>
+                <a class="bg-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-medium transition-all hover:bg-neutral-800 active:scale-95 shadow-sm flex items-center gap-1.5" href="#signup">
+                    <span>Sign up</span>
+                </a>
+                <!-- Mobile menu toggle -->
+                <button id="mobileMenuBtn" class="md:hidden w-9 h-9 flex items-center justify-center text-primary" aria-label="Toggle menu">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden md:hidden border-t border-border-auralis bg-surface px-6 py-4 flex flex-col gap-3">
+            <a class="text-sm font-medium text-secondary-auralis hover:text-primary py-1" href="#studio">Auralis Studio</a>
+            <a class="text-sm font-medium text-secondary-auralis hover:text-primary py-1" href="#agents">Auralis Agents</a>
+            <a class="text-sm font-medium text-secondary-auralis hover:text-primary py-1" href="#api">Auralis API</a>
+            <a class="text-sm font-medium text-secondary-auralis hover:text-primary py-1" href="#resources">Resources</a>
+            <a class="text-sm font-medium text-secondary-auralis hover:text-primary py-1" href="#enterprise">Enterprise</a>
+            <a class="text-sm font-medium text-secondary-auralis hover:text-primary py-1" href="#pricing">Pricing</a>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow pt-[120px] md:pt-[150px] pb-16">
+
+        <!-- HERO SECTION -->
+        <section class="max-w-[1280px] mx-auto px-6 md:px-8 mb-20 md:mb-[130px]">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Headline & Primary Action -->
+                <div class="lg:col-span-7 flex flex-col">
+                    <h1 class="text-[52px] sm:text-[68px] lg:text-[84px] font-semibold text-primary leading-[1.03] tracking-tighter mb-8">
+                        AI audio that<br>sounds human
+                    </h1>
+                    
+                    <div class="flex flex-wrap items-center gap-4">
+                        <a class="group bg-primary text-on-primary px-7 py-3.5 rounded-full font-medium text-sm md:text-base transition-all hover:bg-neutral-800 active:scale-95 shadow-sm inline-flex items-center gap-2" href="#signup">
+                            <span>Sign up</span>
+                            <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </a>
+                        <a class="bg-transparent border border-border-auralis text-primary px-7 py-3.5 rounded-full font-medium text-sm md:text-base transition-all hover:bg-panel-auralis hover:border-neutral-400 active:scale-95 inline-flex items-center" href="#contact">
+                            Contact sales
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Editorial Descriptive Paragraph -->
+                <div class="lg:col-span-5 flex justify-start lg:justify-end">
+                    <p class="text-base sm:text-lg text-secondary-auralis leading-relaxed max-w-md lg:pt-3">
+                        Next-generation neural speech synthesis and conversational intelligence engineered for high-fidelity audio workflows, multi-track studio editing, and sub-100ms real-time voice agents.
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- HERO PRODUCT SHOWCASE PANEL -->
+        <section class="max-w-[1280px] mx-auto px-6 md:px-8 mb-24 md:mb-[160px]">
+            <div class="bg-panel-auralis rounded-3xl md:rounded-[2rem] p-6 md:p-8 flex flex-col justify-between relative overflow-hidden border border-border-auralis min-h-[540px] md:min-h-[620px] shadow-sm">
+                
+                <!-- Top Tabs & Engine Badge -->
+                <div class="flex flex-wrap justify-between items-center gap-4 z-20">
+                    <div class="inline-flex bg-card-auralis p-1 rounded-full border border-border-auralis shadow-xs" id="heroSystemTabs">
+                        <button data-tab="studio" class="system-tab-btn px-4 py-2 bg-primary text-white rounded-full text-xs sm:text-sm font-medium shadow-xs transition-all">
+                            Auralis Studio
+                        </button>
+                        <button data-tab="agents" class="system-tab-btn px-4 py-2 text-secondary-auralis hover:text-primary rounded-full text-xs sm:text-sm font-medium transition-all">
+                            Auralis Agents
+                        </button>
+                        <button data-tab="api" class="system-tab-btn px-4 py-2 text-secondary-auralis hover:text-primary rounded-full text-xs sm:text-sm font-medium transition-all">
+                            Auralis API
+                        </button>
+                    </div>
+
+                    <div class="bg-card-auralis px-4 py-2 rounded-full border border-border-auralis flex items-center gap-2.5 shadow-xs">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
+                        <span class="text-xs sm:text-sm font-medium text-primary" id="heroActiveEngineLabel">AI Voice Generator</span>
+                    </div>
+                </div>
+
+                <!-- Center Radiant Mesh Gradient / Interactive Orb -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+                    <div class="relative w-[340px] md:w-[500px] h-[340px] md:h-[500px] flex items-center justify-center">
+                        <!-- Coral / Rose orb -->
+                        <div class="orb-float-1 w-[260px] md:w-[360px] h-[260px] md:h-[360px] rounded-full bg-gradient-to-tr from-rose-500/70 via-orange-400/60 to-pink-500/50 blur-[70px] absolute -top-12 -left-16 mix-blend-multiply opacity-80"></div>
+                        <!-- Cyan / Blue orb -->
+                        <div class="orb-float-2 w-[300px] md:w-[420px] h-[300px] md:h-[420px] rounded-full bg-gradient-to-tr from-cyan-400/80 via-blue-500/70 to-indigo-600/60 blur-[85px] absolute -bottom-10 -right-12 mix-blend-multiply opacity-85"></div>
+                        <!-- Purple / Indigo center orb -->
+                        <div class="orb-float-3 w-[280px] md:w-[380px] h-[280px] md:h-[380px] rounded-full bg-gradient-to-tr from-purple-500/75 via-indigo-500/65 to-sky-400/60 blur-[75px] absolute inset-auto mix-blend-multiply opacity-90"></div>
+                        <!-- Subtle ambient emerald rim -->
+                        <div class="w-[200px] md:w-[280px] h-[200px] md:h-[280px] rounded-full bg-gradient-to-tr from-emerald-400/40 to-teal-300/30 blur-[60px] absolute bottom-0 left-12 mix-blend-multiply opacity-70"></div>
+                    </div>
+                </div>
+
+                <!-- Center Interactive Frosted Play Button & Live Waveform -->
+                <div class="z-20 self-center my-auto flex flex-col items-center gap-5">
+                    <div class="relative flex items-center justify-center">
+                        <button id="heroPlayBtn" class="w-20 h-20 md:w-24 md:h-24 bg-card-auralis/90 backdrop-blur-xl rounded-full flex items-center justify-center shadow-[0_20px_40px_-12px_rgba(0,0,0,0.18)] border border-white/80 transition-all hover:scale-105 active:scale-95 group focus:outline-none" aria-label="Play sample voice">
+                            <span class="material-symbols-outlined text-4xl md:text-5xl text-primary pl-1 transition-colors group-hover:text-black" id="heroPlayIcon">play_arrow</span>
+                        </button>
+                    </div>
+                    <!-- Audio status pill -->
+                    <div class="px-4 py-1.5 rounded-full bg-white/70 backdrop-blur-md border border-white/60 text-xs font-medium text-secondary-auralis shadow-xs flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="heroSoundStatus">Click to audition neural voice model</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Floating Control Dock -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 z-20 bg-card-auralis/85 backdrop-blur-md p-3 md:p-4 rounded-2xl border border-border-auralis shadow-xs">
+                    <div class="flex gap-2 md:gap-5 overflow-x-auto no-scrollbar w-full sm:w-auto py-1" id="heroToolPills">
+                        <button data-engine="AI Voice Generator" class="tool-pill active px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium bg-primary text-white transition-all whitespace-nowrap">
+                            AI Voice Generator
+                        </button>
+                        <button data-engine="Text to Speech" class="tool-pill px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium text-secondary-auralis hover:text-primary transition-all whitespace-nowrap">
+                            Text to Speech
+                        </button>
+                        <button data-engine="Music" class="tool-pill px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium text-secondary-auralis hover:text-primary transition-all whitespace-nowrap">
+                            Music
+                        </button>
+                        <button data-engine="Sound Effects" class="tool-pill px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium text-secondary-auralis hover:text-primary transition-all whitespace-nowrap">
+                            Sound Effects
+                        </button>
+                        <button data-engine="Voice Cloning" class="tool-pill px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium text-secondary-auralis hover:text-primary transition-all whitespace-nowrap">
+                            Voice Cloning
+                        </button>
+                    </div>
+
+                    <a class="bg-primary text-on-primary px-6 py-2.5 rounded-full text-xs md:text-sm font-medium whitespace-nowrap hover:bg-neutral-800 transition-all active:scale-95 shadow-xs w-full sm:w-auto text-center" href="#signup">
+                        Sign up
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TRUST STRIP HEADER -->
+        <section class="max-w-[1280px] mx-auto px-6 md:px-8 text-center mb-8">
+            <h3 class="text-xs md:text-[13px] font-semibold text-secondary-auralis uppercase tracking-[0.14em]">
+                Trusted by teams building modern audio experiences
+            </h3>
+        </section>
+
+        <!-- LOGO MARQUEE SECTION -->
+        <section class="w-full overflow-hidden mb-24 md:mb-[160px] py-2 border-y border-border-auralis/50 bg-[#F7F7F5]/50">
+            <div class="flex whitespace-nowrap overflow-hidden">
+                <div class="flex items-center gap-16 md:gap-24 animate-marquee py-3">
+                    
+                    <!-- Set 1 -->
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">bolt</span>Velocity
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">deployed_code</span>Nexus
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">auto_awesome</span>Lumina
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">layers</span>Stack
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">token</span>Quanta
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">hub</span>Orbital
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">data_exploration</span>Scalar
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">graphic_eq</span>Pulse
+                    </div>
+
+                    <!-- Duplicate Set for Seamless Loop -->
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">bolt</span>Velocity
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">deployed_code</span>Nexus
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">auto_awesome</span>Lumina
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">layers</span>Stack
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">token</span>Quanta
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">hub</span>Orbital
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">data_exploration</span>Scalar
+                    </div>
+                    <div class="flex items-center gap-2.5 text-neutral-400 hover:text-primary transition-colors font-bold text-lg md:text-xl uppercase tracking-tighter italic">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl text-neutral-400">graphic_eq</span>Pulse
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- PLATFORM OVERVIEW SECTION -->
+        <section class="max-w-[1280px] mx-auto px-6 md:px-8 mb-24 md:mb-[160px]">
+            <div class="text-center max-w-3xl mx-auto mb-14 md:mb-16">
+                <h2 class="text-4xl sm:text-5xl lg:text-[60px] font-semibold text-primary mb-5 tracking-tight leading-[1.08]">
+                    Two systems, one shared intelligence layer
+                </h2>
+                <p class="text-base sm:text-lg text-secondary-auralis leading-relaxed">
+                    Whether you are mastering nuanced studio voiceovers or running autonomous conversational telephony, every product builds upon our unified neural foundation.
+                </p>
+            </div>
+
+            <!-- Two Preview Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12">
+                
+                <!-- Large Card 1: Soft Editor UI -->
+                <div class="bg-card-auralis rounded-2xl md:rounded-3xl p-7 md:p-8 border border-border-auralis h-[260px] md:h-[290px] flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+                    <!-- Soft Lavender Tint -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-200/50 via-indigo-100/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="flex justify-between items-start z-10">
+                        <div class="w-10 h-10 rounded-xl bg-white/80 border border-white flex items-center justify-center text-primary shadow-xs">
+                            <span class="material-symbols-outlined text-2xl text-purple-700">edit_document</span>
+                        </div>
+                        <span class="text-xs font-mono font-medium text-secondary-auralis uppercase tracking-wider">v4.2 PRO</span>
+                    </div>
+                    <div class="z-10">
+                        <h4 class="text-xl md:text-2xl font-semibold text-primary mb-2">Soft Editor UI</h4>
+                        <p class="text-sm md:text-base text-secondary-auralis leading-relaxed">
+                            Fluid timeline with non-destructive acoustic synthesis and fine-grained phoneme inflection curves.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Large Card 2: Transcript Panel -->
+                <div class="bg-card-auralis rounded-2xl md:rounded-3xl p-7 md:p-8 border border-border-auralis h-[260px] md:h-[290px] flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+                    <!-- Soft Mint/Teal Tint -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-100/60 via-teal-100/30 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="flex justify-between items-start z-10">
+                        <div class="w-10 h-10 rounded-xl bg-white/80 border border-white flex items-center justify-center text-primary shadow-xs">
+                            <span class="material-symbols-outlined text-2xl text-emerald-700">closed_caption</span>
+                        </div>
+                        <span class="text-xs font-mono font-medium text-secondary-auralis uppercase tracking-wider">Sub-100ms</span>
+                    </div>
+                    <div class="z-10">
+                        <h4 class="text-xl md:text-2xl font-semibold text-primary mb-2">Transcript Panel</h4>
+                        <p class="text-sm md:text-base text-secondary-auralis leading-relaxed">
+                            Synchronized real-time speech diarization, emotional prosody markers, and multi-speaker script alignment.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- HARDWARE STUDIO DISPLAY WORKSTATION MOCKUP -->
+            <div class="w-full bg-[#EAE8E3]/60 rounded-3xl md:rounded-[2.5rem] p-4 md:p-12 border border-border-auralis flex flex-col items-center justify-center relative overflow-hidden shadow-inner">
+                
+                <!-- Monitor Device Chassis -->
+                <div class="w-full max-w-[1040px] bg-neutral-900 rounded-[1.75rem] p-3 md:p-4 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] border border-neutral-700 relative">
+                    
+                    <!-- WebCam Notch / Dot -->
+                    <div class="absolute top-2 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-neutral-700"></div>
+
+                    <!-- Screen Content Inside Display -->
+                    <div class="w-full aspect-[16/10] bg-[#F7F7F5] rounded-xl overflow-hidden relative border border-neutral-800 flex flex-col">
+                        
+                        <!-- Top macOS/Studio Window Bar -->
+                        <div class="h-8 bg-[#ECEAE6] border-b border-[#E1DFDB] px-4 flex items-center justify-between">
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-neutral-400"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-neutral-400"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-neutral-400"></div>
+                            </div>
+                            <span class="text-[11px] font-medium text-neutral-500 font-mono">auralis-studio://session-084-master</span>
+                            <div class="text-[10px] font-mono text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                LIVE 48kHz
+                            </div>
+                        </div>
+
+                        <!-- Mockup Background Studio UI (Behind floating card) -->
+                        <div class="flex-grow p-6 grid grid-cols-12 gap-6 opacity-65 select-none pointer-events-none filter blur-[0.5px]">
+                            <!-- Left Sidebar Tracks -->
+                            <div class="col-span-3 bg-white/70 rounded-xl p-4 border border-border-auralis flex flex-col gap-3">
+                                <div class="h-4 bg-neutral-200 rounded w-2/3"></div>
+                                <div class="space-y-2 pt-2">
+                                    <div class="p-2 bg-neutral-100 rounded text-xs flex justify-between items-center">
+                                        <span class="font-medium text-neutral-700">Vox A (Lead)</span>
+                                        <span class="text-[10px] text-emerald-600 font-mono">0.0dB</span>
+                                    </div>
+                                    <div class="p-2 bg-neutral-50 rounded text-xs flex justify-between items-center">
+                                        <span class="text-neutral-500">Vox B (Harmony)</span>
+                                        <span class="text-[10px] text-neutral-400 font-mono">-2.4dB</span>
+                                    </div>
+                                    <div class="p-2 bg-neutral-50 rounded text-xs flex justify-between items-center">
+                                        <span class="text-neutral-500">Spatial Bed</span>
+                                        <span class="text-[10px] text-neutral-400 font-mono">-6.0dB</span>
+                                    </div>
+                                    <div class="p-2 bg-neutral-50 rounded text-xs flex justify-between items-center">
+                                        <span class="text-neutral-500">Synthesizer Bus</span>
+                                        <span class="text-[10px] text-neutral-400 font-mono">-1.2dB</span>
+                                    </div>
+                                </div>
+                                <div class="mt-auto h-20 bg-neutral-100 rounded-lg p-2 flex items-end gap-1">
+                                    <div class="flex-1 bg-neutral-300 h-1/2 rounded-xs"></div>
+                                    <div class="flex-1 bg-neutral-400 h-3/4 rounded-xs"></div>
+                                    <div class="flex-1 bg-neutral-300 h-2/3 rounded-xs"></div>
+                                    <div class="flex-1 bg-neutral-500 h-full rounded-xs"></div>
+                                    <div class="flex-1 bg-neutral-300 h-1/3 rounded-xs"></div>
+                                </div>
+                            </div>
+
+                            <!-- Right Waveform Timeline Grid -->
+                            <div class="col-span-9 flex flex-col gap-4">
+                                <!-- Top Timeline Ruler -->
+                                <div class="h-6 bg-white/60 rounded border border-border-auralis flex items-center px-3 justify-between font-mono text-[10px] text-neutral-400">
+                                    <span>00:00</span>
+                                    <span>00:15</span>
+                                    <span>00:30</span>
+                                    <span>00:45</span>
+                                    <span>01:00</span>
+                                    <span>01:15</span>
+                                </div>
+
+                                <!-- Track Waveform Blocks -->
+                                <div class="space-y-3">
+                                    <div class="h-16 bg-blue-50/70 border border-blue-200 rounded-lg p-2 relative overflow-hidden flex items-center">
+                                        <div class="absolute inset-0 flex items-center justify-around opacity-40 px-2">
+                                            <div class="w-1 bg-blue-600 h-8 rounded-full"></div>
+                                            <div class="w-1 bg-blue-600 h-12 rounded-full"></div>
+                                            <div class="w-1 bg-blue-600 h-6 rounded-full"></div>
+                                            <div class="w-1 bg-blue-600 h-10 rounded-full"></div>
+                                            <div class="w-1 bg-blue-600 h-14 rounded-full"></div>
+                                            <div class="w-1 bg-blue-600 h-4 rounded-full"></div>
+                                            <div class="w-1 bg-blue-600 h-12 rounded-full"></div>
+                                            <div class="w-1 bg-blue-600 h-8 rounded-full"></div>
+                                            <div class="w-1 bg-blue-600 h-10 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                    <div class="h-16 bg-purple-50/70 border border-purple-200 rounded-lg p-2 relative overflow-hidden flex items-center">
+                                        <div class="absolute inset-0 flex items-center justify-around opacity-40 px-2">
+                                            <div class="w-1 bg-purple-600 h-4 rounded-full"></div>
+                                            <div class="w-1 bg-purple-600 h-10 rounded-full"></div>
+                                            <div class="w-1 bg-purple-600 h-14 rounded-full"></div>
+                                            <div class="w-1 bg-purple-600 h-8 rounded-full"></div>
+                                            <div class="w-1 bg-purple-600 h-12 rounded-full"></div>
+                                            <div class="w-1 bg-purple-600 h-6 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Bottom Analytics Bar -->
+                                <div class="grid grid-cols-3 gap-4 mt-auto">
+                                    <div class="bg-white/80 p-3 rounded-lg border border-border-auralis">
+                                        <div class="text-[10px] text-neutral-400 uppercase">Acoustic Purity</div>
+                                        <div class="text-lg font-bold text-neutral-800">99.4%</div>
+                                    </div>
+                                    <div class="bg-white/80 p-3 rounded-lg border border-border-auralis">
+                                        <div class="text-[10px] text-neutral-400 uppercase">Jitter Variance</div>
+                                        <div class="text-lg font-bold text-neutral-800">0.018ms</div>
+                                    </div>
+                                    <div class="bg-white/80 p-3 rounded-lg border border-border-auralis">
+                                        <div class="text-[10px] text-neutral-400 uppercase">Dynamic Range</div>
+                                        <div class="text-lg font-bold text-neutral-800">124 dB</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FLOATING GLASSMORPHIC WIDGET CONTAINER (Centered over screen) -->
+                        <div class="absolute inset-0 flex items-center justify-center p-4 z-20">
+                            <!-- Background Colorful Light Blur Bleed -->
+                            <div class="absolute w-72 h-72 bg-blue-500/25 rounded-full blur-[90px] -translate-x-20 -translate-y-6"></div>
+                            <div class="absolute w-72 h-72 bg-purple-500/25 rounded-full blur-[90px] translate-x-20 translate-y-6"></div>
+
+                            <!-- The Glassmorphic Modal Card -->
+                            <div class="relative w-full max-w-[460px] bg-white/40 backdrop-blur-3xl border border-white/80 rounded-[2rem] p-6 md:p-8 shadow-[0_36px_70px_-20px_rgba(0,0,0,0.3),inset_0_0_0_1px_rgba(255,255,255,0.8)] flex flex-col gap-6">
+                                
+                                <!-- Header: Status & Model -->
+                                <div class="flex items-center justify-between">
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.25em] text-primary/60 mb-0.5">Neural Engine v4.2 PRO</span>
+                                        <span class="text-xs md:text-sm font-semibold text-primary tracking-tight">Real-time Synthesis Active</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 bg-emerald-500/15 px-3 py-1 rounded-full border border-emerald-500/30">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-widest">Studio Mode</span>
+                                    </div>
+                                </div>
+
+                                <!-- Dynamic Spectral Visualization Equalizer -->
+                                <div class="flex items-end justify-between h-20 md:h-24 gap-1.5 px-1 py-1" id="spectralEqualizer">
+                                    <div class="flex-1 bg-gradient-to-t from-blue-500/40 to-blue-500 rounded-full h-[30%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-blue-500/40 to-blue-500 rounded-full h-[45%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-blue-500/40 to-blue-500 rounded-full h-[70%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-blue-500/40 to-blue-500 rounded-full h-[60%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-purple-500/50 to-purple-600 rounded-full h-[90%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-purple-500/50 to-purple-600 rounded-full h-[98%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-purple-500/50 to-purple-600 rounded-full h-[75%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-blue-500/40 to-blue-500 rounded-full h-[50%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-blue-500/40 to-blue-500 rounded-full h-[65%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-blue-500/40 to-blue-500 rounded-full h-[35%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-blue-500/40 to-blue-500 rounded-full h-[55%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-blue-500/40 to-blue-500 rounded-full h-[25%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-blue-500/40 to-blue-500 rounded-full h-[40%] eq-bar eq-playing"></div>
+                                    <div class="flex-1 bg-gradient-to-t from-blue-500/40 to-blue-500 rounded-full h-[20%] eq-bar eq-playing"></div>
+                                </div>
+
+                                <!-- Key Latency & Stability Metrics -->
+                                <div class="grid grid-cols-3 gap-4 py-1 border-t border-black/5">
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] uppercase tracking-widest text-secondary-auralis font-semibold">Latency</span>
+                                        <div class="flex items-baseline gap-1">
+                                            <span class="text-lg md:text-xl font-bold text-primary" id="widgetLatency">24</span>
+                                            <span class="text-xs text-secondary-auralis font-medium">ms</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] uppercase tracking-widest text-secondary-auralis font-semibold">Confidence</span>
+                                        <div class="flex items-baseline gap-1">
+                                            <span class="text-lg md:text-xl font-bold text-primary">99.8</span>
+                                            <span class="text-xs text-secondary-auralis font-medium">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] uppercase tracking-widest text-secondary-auralis font-semibold">Stability</span>
+                                        <div class="flex items-baseline gap-1">
+                                            <span class="text-lg md:text-xl font-bold text-primary">0.02</span>
+                                            <span class="text-xs text-secondary-auralis font-medium">jitter</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Playback Controls & Timecode -->
+                                <div class="flex items-center justify-between border-t border-black/5 pt-4">
+                                    <div class="flex items-center gap-4">
+                                        <button class="material-symbols-outlined text-2xl text-primary/60 hover:text-primary transition-colors active:scale-90" id="widgetPrevBtn">skip_previous</button>
+                                        <button class="w-11 h-11 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-transform" id="widgetPlayBtn" aria-label="Play Studio Audio">
+                                            <span class="material-symbols-outlined fill text-2xl" id="widgetPlayIcon">play_arrow</span>
+                                        </button>
+                                        <button class="material-symbols-outlined text-2xl text-primary/60 hover:text-primary transition-colors active:scale-90" id="widgetNextBtn">skip_next</button>
+                                    </div>
+                                    <div class="flex flex-col items-end">
+                                        <span class="text-[11px] md:text-[12px] font-mono font-bold text-primary bg-white/70 px-2.5 py-0.5 rounded-md border border-white/80 shadow-xs" id="widgetTimer">00:42.12</span>
+                                        <span class="text-[9px] font-bold text-secondary-auralis/70 uppercase tracking-tighter mt-0.5">Total Length 04:20</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Monitor Aluminum Stand -->
+                <div class="w-32 md:w-44 h-12 md:h-16 bg-gradient-to-b from-neutral-300 to-neutral-400 rounded-b-md shadow-md mx-auto -mt-1 border-x border-neutral-400"></div>
+                <div class="w-48 md:w-64 h-3 bg-neutral-300 rounded-full shadow-lg mx-auto border-t border-white/60"></div>
+
+            </div>
+        </section>
+
+        <!-- AURALIS STUDIO MODULE -->
+        <section id="studio" class="max-w-[1280px] mx-auto px-6 md:px-8 mb-24 md:mb-[160px]">
+            
+            <!-- Section Module Header Pill -->
+            <div class="flex items-center gap-4 mb-8">
+                <span class="text-xs font-semibold tracking-wider uppercase bg-surface-variant text-primary px-3.5 py-1.5 rounded-full border border-neutral-300/60">
+                    Auralis Studio
+                </span>
+                <div class="h-px bg-border-auralis flex-grow"></div>
+            </div>
+
+            <!-- Headline Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 mb-12">
+                <div class="lg:col-span-5">
+                    <h2 class="text-3xl sm:text-4xl lg:text-[48px] font-semibold text-primary leading-[1.1] tracking-tight">
+                        Create, refine, & scale audio in one place
+                    </h2>
+                </div>
+                <div class="lg:col-span-6 lg:col-start-7 flex items-end">
+                    <p class="text-base sm:text-lg text-secondary-auralis leading-relaxed">
+                        A full digital audio workstation right in the browser. Arrange vocal stems, inject realistic ambient room tones, adjust pitch contours, and export broadcast-ready masters in seconds.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2 Feature Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                
+                <!-- Studio Card 1: Soft Editor UI with DAW timeline representation -->
+                <div class="bg-neutral-900 rounded-2xl md:rounded-3xl border border-border-auralis h-[320px] md:h-[350px] flex flex-col justify-between relative overflow-hidden group shadow-sm">
+                    <!-- Multitrack Graphic Simulator -->
+                    <div class="p-5 flex flex-col gap-3 font-mono text-xs text-neutral-300">
+                        <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
+                            <span class="text-[11px] text-neutral-400">PROJECT: NEURAL_MASTER_EP01</span>
+                            <span class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">48kHz / 32-bit float</span>
+                        </div>
+                        <!-- Waveform Track 1 -->
+                        <div class="bg-neutral-800/80 rounded-lg p-2.5 border border-neutral-700/60 flex flex-col gap-1.5">
+                            <div class="flex justify-between text-[11px]">
+                                <span class="text-neutral-300 font-medium">Track 01 • Voice Lead (Aria AI)</span>
+                                <span class="text-neutral-400">Gain +1.2dB</span>
+                            </div>
+                            <div class="h-8 bg-neutral-900/90 rounded flex items-center justify-around px-2 relative overflow-hidden">
+                                <div class="w-1 bg-cyan-400 h-4 rounded"></div>
+                                <div class="w-1 bg-cyan-400 h-7 rounded"></div>
+                                <div class="w-1 bg-cyan-400 h-5 rounded"></div>
+                                <div class="w-1 bg-cyan-400 h-6 rounded"></div>
+                                <div class="w-1 bg-cyan-400 h-3 rounded"></div>
+                                <div class="w-1 bg-cyan-400 h-8 rounded"></div>
+                                <div class="w-1 bg-cyan-400 h-6 rounded"></div>
+                                <div class="w-1 bg-cyan-400 h-4 rounded"></div>
+                                <div class="w-1 bg-cyan-400 h-7 rounded"></div>
+                                <div class="w-1 bg-cyan-400 h-5 rounded"></div>
+                                <div class="w-1 bg-cyan-400 h-7 rounded"></div>
+                                <!-- Scrub line -->
+                                <div class="absolute left-1/3 top-0 bottom-0 w-0.5 bg-red-500 shadow-sm"></div>
+                            </div>
+                        </div>
+                        <!-- Waveform Track 2 -->
+                        <div class="bg-neutral-800/50 rounded-lg p-2 border border-neutral-700/40 flex flex-col gap-1 opacity-80">
+                            <div class="flex justify-between text-[10px] text-neutral-400">
+                                <span>Track 02 • Room Acoustic Reverb</span>
+                                <span>Wet 24%</span>
+                            </div>
+                            <div class="h-6 bg-neutral-900/90 rounded flex items-center justify-around px-2">
+                                <div class="w-1 bg-purple-400 h-3 rounded"></div>
+                                <div class="w-1 bg-purple-400 h-5 rounded"></div>
+                                <div class="w-1 bg-purple-400 h-2 rounded"></div>
+                                <div class="w-1 bg-purple-400 h-4 rounded"></div>
+                                <div class="w-1 bg-purple-400 h-5 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overlay Label Banner -->
+                    <div class="z-10 bg-black/60 backdrop-blur-xl border-t border-neutral-800 p-5 rounded-b-2xl md:rounded-b-3xl text-white">
+                        <h4 class="text-lg md:text-xl font-semibold text-white mb-1">Soft Editor UI</h4>
+                        <p class="text-xs md:text-sm text-neutral-300">
+                            Interactive waveform manipulation with instant rendering and real-time auditioning.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Studio Card 2: Transcript Panel -->
+                <div class="bg-card-auralis rounded-2xl md:rounded-3xl p-6 md:p-8 border border-border-auralis h-[320px] md:h-[350px] flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+                    
+                    <div class="flex justify-between items-start">
+                        <div class="w-10 h-10 rounded-xl bg-panel-auralis flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined text-2xl">closed_caption</span>
+                        </div>
+                        <span class="text-xs font-mono font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                            Sync Accuracy 99.9%
+                        </span>
+                    </div>
+
+                    <!-- Transcript Simulation Snippets -->
+                    <div class="space-y-3 font-sans py-2">
+                        <div class="p-3 bg-panel-auralis/80 rounded-xl text-xs md:text-sm flex gap-3 items-start border border-border-auralis/60">
+                            <span class="font-mono text-[11px] text-secondary-auralis pt-0.5">00:04</span>
+                            <p class="text-neutral-800 leading-snug">
+                                <span class="bg-neutral-900 text-white px-1.5 py-0.5 rounded">Welcome</span> to the next frontier in synthetic voice design.
+                            </p>
+                        </div>
+                        <div class="p-3 bg-white rounded-xl text-xs md:text-sm flex gap-3 items-start border border-border-auralis shadow-xs">
+                            <span class="font-mono text-[11px] text-secondary-auralis pt-0.5">00:09</span>
+                            <p class="text-neutral-600 leading-snug">
+                                Every breath, pause, and subtle vocal inflection can be sculpted with zero latency.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-lg md:text-xl font-semibold text-primary mb-1">Transcript Panel</h4>
+                        <p class="text-xs md:text-sm text-secondary-auralis leading-relaxed">
+                            Edit speech like text. Delete words to trim audio or type new dialogue to seamlessly regenerate stems.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 4 Studio Pill Feature Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                
+                <div class="bg-panel-auralis rounded-2xl p-5 border border-border-auralis flex flex-col gap-3 items-start hover:bg-surface-variant hover:border-neutral-300 transition-all cursor-pointer group">
+                    <div class="w-9 h-9 rounded-xl bg-card-auralis border border-border-auralis flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-xl">music_note</span>
+                    </div>
+                    <div>
+                        <span class="font-semibold text-sm text-primary block">Waves & Music</span>
+                        <span class="text-xs text-secondary-auralis">Harmonic stems</span>
+                    </div>
+                </div>
+
+                <div class="bg-panel-auralis rounded-2xl p-5 border border-border-auralis flex flex-col gap-3 items-start hover:bg-surface-variant hover:border-neutral-300 transition-all cursor-pointer group">
+                    <div class="w-9 h-9 rounded-xl bg-card-auralis border border-border-auralis flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-xl">graphic_eq</span>
+                    </div>
+                    <div>
+                        <span class="font-semibold text-sm text-primary block">SFX Generator</span>
+                        <span class="text-xs text-secondary-auralis">Text-to-ambience</span>
+                    </div>
+                </div>
+
+                <div class="bg-panel-auralis rounded-2xl p-5 border border-border-auralis flex flex-col gap-3 items-start hover:bg-surface-variant hover:border-neutral-300 transition-all cursor-pointer group">
+                    <div class="w-9 h-9 rounded-xl bg-card-auralis border border-border-auralis flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-xl">record_voice_over</span>
+                    </div>
+                    <div>
+                        <span class="font-semibold text-sm text-primary block">Custom Voices</span>
+                        <span class="text-xs text-secondary-auralis">Zero-shot cloning</span>
+                    </div>
+                </div>
+
+                <div class="bg-panel-auralis rounded-2xl p-5 border border-border-auralis flex flex-col gap-3 items-start hover:bg-surface-variant hover:border-neutral-300 transition-all cursor-pointer group">
+                    <div class="w-9 h-9 rounded-xl bg-card-auralis border border-border-auralis flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-xl">movie</span>
+                    </div>
+                    <div>
+                        <span class="font-semibold text-sm text-primary block">Integrated Editor</span>
+                        <span class="text-xs text-secondary-auralis">Timeline sync</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- AURALIS AGENTS MODULE -->
+        <section id="agents" class="max-w-[1280px] mx-auto px-6 md:px-8 mb-24 md:mb-[160px]">
+            
+            <!-- Section Module Header Pill -->
+            <div class="flex items-center gap-4 mb-8">
+                <span class="text-xs font-semibold tracking-wider uppercase bg-surface-variant text-primary px-3.5 py-1.5 rounded-full border border-neutral-300/60">
+                    Auralis Agents
+                </span>
+                <div class="h-px bg-border-auralis flex-grow"></div>
+            </div>
+
+            <!-- Headline Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 mb-12">
+                <div class="lg:col-span-5">
+                    <h2 class="text-3xl sm:text-4xl lg:text-[48px] font-semibold text-primary leading-[1.1] tracking-tight">
+                        Build agents that listen, respond, and act
+                    </h2>
+                </div>
+                <div class="lg:col-span-6 lg:col-start-7 flex items-end">
+                    <p class="text-base sm:text-lg text-secondary-auralis leading-relaxed">
+                        Deploy intelligent voice agents equipped with uninterrupted full-duplex conversational ability, sub-100ms response latency, and seamless integration with existing telephony and web backends.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2 Showcase Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Agent Card 1: Omnichannel Agents Chat Preview -->
+                <div class="bg-card-auralis rounded-3xl p-6 md:p-8 border border-border-auralis min-h-[460px] flex flex-col relative overflow-hidden group hover:shadow-md transition-all">
+                    
+                    <!-- Ambient Glow Behind Card -->
+                    <div class="absolute inset-0 flex items-center justify-center opacity-35 group-hover:opacity-50 transition-opacity">
+                        <div class="w-[240px] h-[240px] rounded-full bg-gradient-to-r from-blue-400 to-cyan-300 blur-3xl absolute -left-10 -top-10"></div>
+                        <div class="w-[240px] h-[240px] rounded-full bg-gradient-to-r from-purple-400 to-pink-300 blur-3xl absolute -right-10 -bottom-10"></div>
+                    </div>
+
+                    <!-- Category Chip -->
+                    <div class="z-10 bg-white/80 backdrop-blur-md self-start px-4 py-1.5 rounded-full border border-border-auralis text-xs font-medium text-primary shadow-xs mb-6">
+                        Omnichannel agents
+                    </div>
+
+                    <!-- Interactive Voice Agent Dialog Widget -->
+                    <div class="z-10 mt-auto bg-white/60 backdrop-blur-2xl p-5 md:p-6 rounded-[2rem] border border-white/80 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.1)] flex flex-col gap-4">
+                        
+                        <!-- AI Message -->
+                        <div class="flex gap-3 items-center">
+                            <div class="w-9 h-9 bg-primary text-white rounded-full flex items-center justify-center shadow-xs flex-shrink-0">
+                                <span class="material-symbols-outlined text-[17px]">smart_toy</span>
+                            </div>
+                            <div class="bg-white/90 border border-border-auralis px-4 py-2.5 rounded-2xl rounded-tl-sm text-xs sm:text-sm text-neutral-800 shadow-xs">
+                                Hello! How can I assist you today?
+                            </div>
+                        </div>
+
+                        <!-- User Message -->
+                        <div class="flex gap-3 items-center flex-row-reverse">
+                            <div class="w-9 h-9 bg-neutral-200 text-primary rounded-full flex items-center justify-center shadow-xs flex-shrink-0">
+                                <span class="material-symbols-outlined text-[17px]">person</span>
+                            </div>
+                            <div class="bg-primary text-white px-4 py-2.5 rounded-2xl rounded-tr-sm text-xs sm:text-sm shadow-md">
+                                I need help checking my deployment status.
+                            </div>
+                        </div>
+
+                        <!-- Interactive agent voice trigger -->
+                        <div class="pt-2 border-t border-black/5 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="text-[11px] text-secondary-auralis font-mono">Agent Voice: Aria-Turbo (92ms)</span>
+                            </div>
+                            <button id="agentAuditionBtn" class="px-3 py-1 bg-white hover:bg-neutral-100 rounded-full border border-neutral-300 text-xs font-medium text-primary flex items-center gap-1 transition-all active:scale-95 shadow-xs">
+                                <span class="material-symbols-outlined text-sm">volume_up</span>
+                                <span>Speak</span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Agent Card 2: Analytics & Deep Insights -->
+                <div class="bg-card-auralis rounded-3xl p-6 md:p-8 border border-border-auralis min-h-[460px] flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
+                    
+                    <!-- Top Category Chip -->
+                    <div class="z-10 bg-white/80 backdrop-blur-md self-start px-4 py-1.5 rounded-full border border-border-auralis text-xs font-medium text-primary shadow-xs">
+                        Analytics & Observability
+                    </div>
+
+                    <!-- Dynamic Chart Representation in Center -->
+                    <div class="w-full py-6 flex flex-col gap-2">
+                        <div class="flex items-end justify-between gap-3 h-40 px-4">
+                            <div class="w-full bg-neutral-200/80 rounded-t-lg h-[35%] hover:bg-neutral-300 transition-colors"></div>
+                            <div class="w-full bg-neutral-200/80 rounded-t-lg h-[55%] hover:bg-neutral-300 transition-colors"></div>
+                            <!-- Peak highlight bar -->
+                            <div class="w-full bg-primary/25 rounded-t-lg h-[88%] relative group/bar hover:bg-primary/35 transition-colors">
+                                <div class="absolute -top-3.5 -right-2 w-7 h-7 bg-primary rounded-full flex items-center justify-center border-2 border-white shadow-md">
+                                    <div class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping"></div>
+                                </div>
+                            </div>
+                            <div class="w-full bg-neutral-200/80 rounded-t-lg h-[65%] hover:bg-neutral-300 transition-colors"></div>
+                            <div class="w-full bg-neutral-200/80 rounded-t-lg h-[45%] hover:bg-neutral-300 transition-colors"></div>
+                            <div class="w-full bg-neutral-200/80 rounded-t-lg h-[75%] hover:bg-neutral-300 transition-colors"></div>
+                        </div>
+                        <div class="flex justify-between px-4 text-[10px] font-mono text-secondary-auralis border-t border-border-auralis pt-2">
+                            <span>00:00</span>
+                            <span>04:00</span>
+                            <span>08:00</span>
+                            <span>12:00</span>
+                            <span>16:00</span>
+                            <span>20:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Glass Description Card -->
+                    <div class="z-10 bg-white/60 backdrop-blur-2xl p-6 rounded-[2rem] border border-white/80 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.1)]">
+                        <h4 class="text-xl font-semibold text-primary mb-1">Deep Insights</h4>
+                        <p class="text-xs md:text-sm text-secondary-auralis leading-relaxed">
+                            Track conversational turn latency, sentiment drift, user interrupt rates, and speech comprehension with microsecond granularity.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- SIGN OFF / CALL TO ACTION SECTION -->
+        <section class="max-w-[1280px] mx-auto px-6 md:px-8 mb-20 md:mb-[140px] text-center flex flex-col items-center">
+            <h2 class="text-4xl sm:text-5xl lg:text-[56px] font-semibold text-primary mb-8 max-w-3xl leading-[1.08] tracking-tight">
+                The future of voice starts here
+            </h2>
+            <div class="flex flex-wrap justify-center items-center gap-4">
+                <a class="group bg-primary text-on-primary px-8 py-4 rounded-full font-medium text-sm md:text-base transition-all hover:bg-neutral-800 active:scale-95 shadow-sm inline-flex items-center gap-2" href="#signup">
+                    <span>Get started</span>
+                    <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </a>
+                <a class="bg-transparent border border-border-auralis text-primary px-8 py-4 rounded-full font-medium text-sm md:text-base transition-all hover:bg-panel-auralis hover:border-neutral-400 active:scale-95" href="#contact">
+                    Talk to sales
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full border-t border-border-auralis py-12 bg-transparent">
+        <div class="max-w-[1280px] mx-auto px-6 md:px-8 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex flex-wrap items-center gap-6 md:gap-8 text-center md:text-left">
+                <span class="text-xl font-bold tracking-tighter text-primary">Auralis</span>
+                <span class="text-xs md:text-sm text-secondary-auralis">© 2026 Auralis AI Inc. Engineered for precision.</span>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-6 md:gap-8">
+                <a class="text-xs md:text-sm text-secondary-auralis hover:text-primary transition-colors" href="#">Twitter</a>
+                <a class="text-xs md:text-sm text-secondary-auralis hover:text-primary transition-colors" href="#">GitHub</a>
+                <a class="text-xs md:text-sm text-secondary-auralis hover:text-primary transition-colors" href="#">API Docs</a>
+                <a class="text-xs md:text-sm text-secondary-auralis hover:text-primary transition-colors" href="#">Terms</a>
+                <a class="text-xs md:text-sm text-secondary-auralis hover:text-primary transition-colors" href="#">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE JAVASCRIPT & WEB AUDIO SYNTHESIZER -->
+    <script>
+        // Web Audio API Ambient Synthesizer
+        let audioCtx = null;
+        let isMuted = false;
+        let isHeroPlaying = false;
+        let isWidgetPlaying = false;
+        let activeOscillators = [];
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Generate synthetic musical chord and ambient voice formant
+        function playChime(freqs = [220, 277.18, 329.63, 440], duration = 1.6) {
+            if (isMuted) return;
+            initAudio();
+
+            const now = audioCtx.currentTime;
+            const masterGain = audioCtx.createGain();
+            masterGain.gain.setValueAtTime(0.01, now);
+            masterGain.gain.exponentialRampToValueAtTime(0.2, now + 0.1);
+            masterGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+            masterGain.connect(audioCtx.destination);
+
+            freqs.forEach(freq => {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+
+                // Add subtle vibrato
+                const lfo = audioCtx.createOscillator();
+                lfo.frequency.setValueAtTime(4.5, now);
+                const lfoGain = audioCtx.createGain();
+                lfoGain.gain.setValueAtTime(1.5, now);
+                lfo.connect(lfoGain);
+                lfoGain.connect(osc.frequency);
+                lfo.start(now);
+                lfo.stop(now + duration);
+
+                osc.connect(masterGain);
+                osc.start(now);
+                osc.stop(now + duration);
+            });
+        }
+
+        // Toggle Sound Mute
+        const soundMuteBtn = document.getElementById('soundMuteBtn');
+        const soundMuteIcon = document.getElementById('soundMuteIcon');
+        soundMuteBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            if (isMuted) {
+                soundMuteIcon.textContent = 'volume_off';
+                soundMuteBtn.classList.add('bg-neutral-200');
+            } else {
+                soundMuteIcon.textContent = 'volume_up';
+                soundMuteBtn.classList.remove('bg-neutral-200');
+                playChime([440, 554.37], 0.4);
+            }
+        });
+
+        // Hero Play Button Interaction
+        const heroPlayBtn = document.getElementById('heroPlayBtn');
+        const heroPlayIcon = document.getElementById('heroPlayIcon');
+        const heroSoundStatus = document.getElementById('heroSoundStatus');
+
+        heroPlayBtn.addEventListener('click', () => {
+            isHeroPlaying = !isHeroPlaying;
+            if (isHeroPlaying) {
+                heroPlayIcon.textContent = 'pause';
+                heroPlayBtn.classList.add('pulse-active');
+                heroSoundStatus.textContent = 'Playing: Neural formant synthesis sample (48kHz)';
+                playChime([261.63, 329.63, 392.00, 523.25], 3.5);
+                setTimeout(() => {
+                    if (isHeroPlaying) {
+                        isHeroPlaying = false;
+                        heroPlayIcon.textContent = 'play_arrow';
+                        heroPlayBtn.classList.remove('pulse-active');
+                        heroSoundStatus.textContent = 'Audition complete • Click to replay';
+                    }
+                }, 3500);
+            } else {
+                heroPlayIcon.textContent = 'play_arrow';
+                heroPlayBtn.classList.remove('pulse-active');
+                heroSoundStatus.textContent = 'Paused • Click to audition neural voice';
+            }
+        });
+
+        // Hero Tool Pills Tab Switching
+        const toolPills = document.querySelectorAll('.tool-pill');
+        const heroActiveEngineLabel = document.getElementById('heroActiveEngineLabel');
+        toolPills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                toolPills.forEach(p => {
+                    p.classList.remove('bg-primary', 'text-white', 'active');
+                    p.classList.add('text-secondary-auralis');
+                });
+                pill.classList.add('bg-primary', 'text-white', 'active');
+                pill.classList.remove('text-secondary-auralis');
+
+                const engineName = pill.getAttribute('data-engine');
+                heroActiveEngineLabel.textContent = engineName;
+                playChime([523.25, 659.25], 0.3);
+            });
+        });
+
+        // Hero System Tabs
+        const systemTabs = document.querySelectorAll('.system-tab-btn');
+        systemTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                systemTabs.forEach(t => {
+                    t.classList.remove('bg-primary', 'text-white', 'shadow-xs');
+                    t.classList.add('text-secondary-auralis');
+                });
+                tab.classList.add('bg-primary', 'text-white', 'shadow-xs');
+                tab.classList.remove('text-secondary-auralis');
+                playChime([392.00, 493.88], 0.25);
+            });
+        });
+
+        // Glassmorphic Studio Widget Play Controls
+        const widgetPlayBtn = document.getElementById('widgetPlayBtn');
+        const widgetPlayIcon = document.getElementById('widgetPlayIcon');
+        const widgetTimer = document.getElementById('widgetTimer');
+        const widgetLatency = document.getElementById('widgetLatency');
+        const eqBars = document.querySelectorAll('.eq-bar');
+
+        let timerSeconds = 42.12;
+        let timerInterval = null;
+
+        widgetPlayBtn.addEventListener('click', () => {
+            isWidgetPlaying = !isWidgetPlaying;
+            if (isWidgetPlaying) {
+                widgetPlayIcon.textContent = 'pause';
+                playChime([329.63, 415.30, 493.88, 659.25], 4.0);
+                
+                // Add equalizer animation
+                eqBars.forEach(b => b.classList.add('eq-playing'));
+
+                timerInterval = setInterval(() => {
+                    timerSeconds += 0.1;
+                    const mins = Math.floor(timerSeconds / 60);
+                    const secs = (timerSeconds % 60).toFixed(2);
+                    widgetTimer.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(5, '0')}`;
+                    widgetLatency.textContent = (20 + Math.floor(Math.random() * 8)).toString();
+                }, 100);
+            } else {
+                widgetPlayIcon.textContent = 'play_arrow';
+                clearInterval(timerInterval);
+                eqBars.forEach(b => b.classList.remove('eq-playing'));
+            }
+        });
+
+        // Widget skip buttons
+        document.getElementById('widgetPrevBtn').addEventListener('click', () => {
+            timerSeconds = Math.max(0, timerSeconds - 5);
+            playChime([220, 277.18], 0.2);
+        });
+        document.getElementById('widgetNextBtn').addEventListener('click', () => {
+            timerSeconds += 5;
+            playChime([440, 554.37], 0.2);
+        });
+
+        // Agent Audition Button
+        const agentAuditionBtn = document.getElementById('agentAuditionBtn');
+        agentAuditionBtn.addEventListener('click', () => {
+            agentAuditionBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">sync</span><span>Synthesizing...</span>';
+            playChime([349.23, 440, 523.25], 1.2);
+            setTimeout(() => {
+                agentAuditionBtn.innerHTML = '<span class="material-symbols-outlined text-sm">volume_up</span><span>Speak</span>';
+            }, 1200);
+        });
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>
