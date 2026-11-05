@@ -2,6 +2,8 @@
 
 A high-fidelity, enterprise-grade landing page for **Auralis AI**, built with **Tailwind CSS**, **Geist Typography**, **Web Audio API sound synthesis**, and modern glassmorphic UI architecture based on the "Engineered Softness" design system.
 
+🔗 **Live Demo:** [https://marsbansiti.github.io/auralis-ai-saas-landing-page/](https://marsbansiti.github.io/auralis-ai-saas-landing-page/)
+
 ![Auralis Preview](screen.png)
 
 ## Overview
